@@ -12,11 +12,12 @@ Width=64
 hp=.4
 vp=.6
 
-output_type=1
+output_type=4
 #0 - none
 #1 - mp4 animation
 #2 - plot solution
 #3 - plot steps
+#4 - gif animation
 
 
 def rand_bin_array(p, N): 
@@ -47,20 +48,20 @@ def step(a,b,X,front,newfronts):
 		newfronts=np.append(newfronts,[[front[0]+a,front[1]+b]], axis=0)
 	return newfronts
 
-if output_type in [1,2,3]:
-	border=max(Height,Width)*.1 														#border for output
-	fig, ax = plt.subplots(figsize=(6, (Height+2*border)/(Width+2*border)*6))			#figure to plot maze
-	camera = Camera(fig)																#camera to snap plot for animation
-	fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)		#remove whitespace around plot
-	ax.axis('off')																		#remove axis
-	plt.xlim([-border,Width+border])													#set axis limits
+if output_type in [1,2,3,4]:
+	border=max(Height,Width)*.1 							#border for output
+	fig, ax = plt.subplots(figsize=(6, (Height+2*border)/(Width+2*border)*6))	#figure to plot maze
+	camera = Camera(fig)								#camera to snap plot for animation
+	fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=None, hspace=None)	#remove whitespace around plot
+	ax.axis('off')									#remove axis
+	plt.xlim([-border,Width+border])						#set axis limits
 	plt.ylim([-border,Height+border])
 
 #generates new mazes until one is solved
 solved=0
 while solved==0:
-	HWallsBin=rand_bin_array(hp,Width*(Height+1)).astype(int) #binary array of which walls are to be deleted
-	HWalls=np.nonzero(HWallsBin) #indexes of all horizontal walls for deletion
+	HWallsBin=rand_bin_array(hp,Width*(Height+1)).astype(int) 	#binary array of which walls are to be deleted
+	HWalls=np.nonzero(HWallsBin) 					#indexes of all horizontal walls for deletion
 
 
 	VWallsBin=rand_bin_array(vp,Height*(Width+1)).astype(int)
@@ -103,9 +104,9 @@ while solved==0:
 			
 			#down
 			if check_walls(front)[1]==0:		#if there is no wall below
-				if front[0]==0:					#if on the bottom row then the maze is solved
+				if front[0]==0:			#if on the bottom row then the maze is solved
 					solved=1
-					finish=front[1] 			#x coordinate of final position
+					finish=front[1] 	#x coordinate of final position
 					break
 				elif X[front[0]-1,front[1]]==0:	#if not on the bottom row and the below position hasn't been stepped into new front below
 					newfronts=step(-1,0,X,front,newfronts)
@@ -121,7 +122,7 @@ while solved==0:
 		fronts=newfronts
 		i+=1
 
-		if output_type==1 and solved==0: #exclude the last frame. This will be added with the solution
+		if output_type in [1,4] and solved==0: #exclude the last frame. This will be added with the solution
 			ax.add_collection(lc1) #add maze walls
 			ax.add_collection(lc2)
 			ax.imshow(X, cmap='hot_r', interpolation='nearest', extent =[0, Width, 0, Height], origin='lower', vmin=0, vmax=3*i) #plot steps
@@ -175,7 +176,7 @@ while position[0]!=Height-1 or position[1]!=start:
 	Solution[position[0],position[1]]=1 #store step in solution matrix
 	i-=1
 
-if output_type==1:
+if output_type in [1,4]:
 	display=np.maximum(X,2*imax*Solution) #overlay solution on step matrix
 	for n in range(20):
 		ax.add_collection(lc1)
@@ -183,13 +184,15 @@ if output_type==1:
 		ax.imshow(display, cmap='hot_r', interpolation='nearest', extent =[0, Width, 0, Height], origin='lower', vmin=0, vmax=3*imax)
 		camera.snap() #snap plot for animation 20 frames (2 secs)
 
-if output_type==1:
 	animation = camera.animate(interval=.1) #animate
-	print("Creating mp4 file...")
-	animation.save('Maze.mp4', fps=10, extra_args=['-vcodec', 'libx264']) 	#save mp4 animation
-	startfile('Maze.mp4')
-	#animation.save('Maze.gif', fps=10, writer = 'imagemagick')				#save gif animation (more expensive)
-	#startfile('Maze.gif')
+	if output_type==1:
+		print("Creating mp4 file...")
+		animation.save('Maze.mp4', fps=10, extra_args=['-vcodec', 'libx264']) #save mp4 animation
+		startfile('Maze.mp4')
+	else:
+		print("Creating gif file...")
+		animation.save('Maze.gif', fps=10, writer = 'imagemagick') #save gif animation (more expensive)
+		startfile('Maze.gif')
 
 #plot results
 if output_type in [2,3]:
