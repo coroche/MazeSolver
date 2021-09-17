@@ -4,7 +4,7 @@ import numpy as np
 
 Lower=5			#lower limit of maze sizes
 Upper=150		#upper limit of maze sizes
-Increment=10	#increment of maze sizes
+Increment=10		#increment of maze sizes
 Sample = 20		#how many mazes to solve of each size
 poly = 3		#order of line of best fit
 
@@ -19,11 +19,11 @@ def strsign(x):
 SizeRange = range(Lower,Upper,Increment)
 StepCount=np.zeros([len(SizeRange),Sample], dtype=int) #array to store all solution lengths for each maze size
 
-for i,size in enumerate(SizeRange):								#loop over each maze size
-	for j in range(Sample):										#get a sample of solution lengths for each size
+for i,size in enumerate(SizeRange):							#loop over each maze size
+	for j in range(Sample):								#get a sample of solution lengths for each size
 		X, Solution, tries = SolveMaze(size,size,0,.4,.6,False) #solves maze
-		StepCount[i,j] = np.max(X) 								#gets the solution length
-AverageSteps = np.average(StepCount, axis=1) 					#gets the average solution length for each size
+		StepCount[i,j] = np.max(X) 						#gets the solution length
+AverageSteps = np.average(StepCount, axis=1) 						#gets the average solution length for each size
 STDSteps = np.std(StepCount, axis=1) 							#gets the standard deviation of solution lengths for each size
 
 x = np.flip(np.polyfit(SizeRange, AverageSteps, poly))	#Line of best fit. Flip the returned array so lowest order of n is first
